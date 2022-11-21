@@ -31,5 +31,7 @@ module.exports = {
         accessibility: "explicit",
       },
     ],
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/no-unsafe-member-acces": "off"
   },
 }
