@@ -1,0 +1,19 @@
+name: Build on merge
+'on':
+  push:
+    branches:
+      - main
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: install # will run `yarn install` command
+      - uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: lint # will run `yarn lint` command
+      - uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: build # will run `yarn build` command
