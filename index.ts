@@ -1,7 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
 import * as firebase from "firebase-admin";
-import {getAuth} from "firebase-admin/lib/auth";
 
 dotenv.config();
 
