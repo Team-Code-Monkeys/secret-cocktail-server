@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import express from "express";
 import * as firebase from "firebase-admin";
+import {getAuth} from "firebase-admin/lib/auth";
 
 dotenv.config();
 
@@ -29,6 +30,26 @@ firebase.initializeApp({
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
     credential: firebase.credential.cert(firebaseCredentials),
 })
+
+// example of giving a user the admin role
+const admin_uid = 'vPqG3OAg3OYC6ye961LcqwJPUsH2';
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+firebase.auth().setCustomUserClaims(admin_uid, {admin: true})
+    .then(() => {
+        console.log('successfully set user claims for admin');
+    }).catch((error) => {
+    console.error('unable to set user claims for admin', error);
+});
+
+// example of giving a user the facility role
+const facility_uid = '7rbmbMXqHldpuq8AQAnykPmdfY03';
+// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+firebase.auth().setCustomUserClaims(facility_uid, {facility: true})
+    .then(() => {
+        console.log('successfully set user claims for facility');
+    }).catch((error) => {
+    console.error('unable to set user claims for facility', error);
+});
 
 const app = express()
 const port = process.env.PORT || 8080
