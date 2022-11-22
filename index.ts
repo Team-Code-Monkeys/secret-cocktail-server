@@ -1,6 +1,7 @@
 import dotenv from "dotenv"
 import express from "express"
 import * as firebase from "firebase-admin"
+import twilio from "twilio"
 
 dotenv.config()
 
@@ -32,6 +33,9 @@ firebase.initializeApp({
   credential: firebase.credential.cert(firebaseCredentials),
 })
 
+const accountSid = process.env.TWILIO_ACCOUNT_SID
+const authToken = process.env.TWILIO_AUTH_TOKEN
+
 // // example of giving a user the admin role
 // const admin_uid = 'vPqG3OAg3OYC6ye961LcqwJPUsH2';
 // // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -61,31 +65,43 @@ query.onSnapshot(
   (querySnapshot) => {
     querySnapshot.forEach((doc: any) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-      const phoneNumberToContact: any = doc?.data()?.phone
+      const phoneNumberToContact: string = doc?.data()?.phone
       if (phoneNumberToContact) {
-        console.log("Scheduling phone survey for: ", phoneNumberToContact)
-        // TODO: schedule phone survey
-        console.log("TODO: schedule phone survey")
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
-        const docId: any = doc?.id
-        if (docId) {
-          db.collection("to-contact-for-survey")
-            .doc(docId)
-            .set({ contacted: true }, { merge: true })
-            .then((_) => {
-              console.log(
-                "Phone survey successfully scheduled for: ",
-                phoneNumberToContact
-              )
-            })
-            .catch((err) => {
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              console.log(
-                // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-                `Encountered error updating to contact status: ${err}`
-              )
-            })
-        }
+        console.log("Sending phone survey to: ", phoneNumberToContact)
+        // TODO: schedule phone survey rather than sending immediately
+        const client = twilio(accountSid, authToken)
+        client.calls
+          .create({
+            url: "http://demo.twilio.com/docs/voice.xml",
+            to: phoneNumberToContact,
+            from: "+14258427518",
+          })
+          .then((call) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access,@typescript-eslint/no-unsafe-assignment
+            const docId: any = doc?.id
+            if (docId) {
+              db.collection("to-contact-for-survey")
+                .doc(docId)
+                .set({ contacted: true, callSID: call?.sid || "" }, { merge: true })
+                .then((_) => {
+                  console.log(
+                    "Phone survey successfully sent to: ",
+                    phoneNumberToContact
+                  )
+                })
+                .catch((err) => {
+                  // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                  console.log(
+                    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+                    `Encountered error updating to contact status: ${err}`
+                  )
+                })
+            }
+          })
+          .catch((err) => {
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            console.log(`Encountered error sending phone survey: ${err}`)
+          })
       }
     })
   },
