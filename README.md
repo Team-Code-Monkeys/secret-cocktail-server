@@ -15,4 +15,6 @@ firebase_auth_uri="..."
 firebase_token_uri="..."
 firebase_auth_provider_x509_cert_url="..."
 firebase_client_x509_cert_url="..."
+TWILIO_ACCOUNT_SID="..."
+TWILIO_AUTH_TOKEN="..."
 ```
